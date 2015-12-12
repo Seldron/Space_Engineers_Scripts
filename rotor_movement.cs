@@ -17,6 +17,14 @@ float CAngle;
 public void Main(string argument)
 
 {
+   if (argument == "R") {
+      last_arg = "";
+      target = 0.0f;
+      CFinished = true;
+      CArg = true;
+      CAngle = 0.0f;
+   } else {
+   
 	if ((argument == "+") || (argument == "-")) {
 		// fetch argument
 		last_arg = argument;
@@ -66,4 +74,5 @@ public void Main(string argument)
 			}
 		}
 	}
+   }
 }
