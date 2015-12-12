@@ -42,7 +42,7 @@ int last_state;
 string current_beacon_name = "ADS_Bracon";
 string pause_cause = "";
 
-
+// define bootup state
 int state = 0;
 
 //create lists to gather the sideways pistons, downwards pistons and drills
@@ -59,152 +59,154 @@ if (UseBeacon) { IMyBeacon ADS_Beacon; }
 if (UseLCDStatus) { IMyTextPanel ADS_Status; }
 if (UseLCDDebug) { IMyTextPanel ADS_Debug; }
 
+
 void Main()
 {
-	if (state == StateStart)
-		start();
-	else if (state == StateInit)
-		init();
-	else if (state == StatePrepareRing)
-		preparering();
-	else if (state == StateMineRing)
-		minering();
-	else if (state == StatePrepareDisk)
-		preparedisk();
-	else if (state == StateFinished)
-		finished();
-	else if (state == StatePaused)
-		paused(pause_cause);	
+   if (state == StateStart)
+      start();
+   else if (state == StateInit)
+      init();
+   else if (state == StatePrepareRing)
+      preparering();
+   else if (state == StateMineRing)
+      minering();
+   else if (state == StatePrepareDisk)
+      preparedisk();
+   else if (state == StateFinished)
+      finished();
+   else if (state == StatePaused)
+      paused(pause_cause);
 }
+
 
 void start()
 {
-	// find ADS_Debug if using Debug LCD is on
-	if (UseLCDDebug)
-	{
-		IMyTextPanel ADS_Debug = GridTerminalSystem.GetBlockWithName(LCDDebugName) as IMyTextPanel;
-	}
-	if (UseLCDDebug) { Debug("State: start", false); }
-	if (UseLCDDebug) { Debug("- Debug screen found", true); }
-	
-	// populate drills list
-	var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DrillGroupName; });
-	var blocks = group.Blocks;
-	for(var j=0; j < blocks.Count; j++)
-	{
-		var drill = (IMyShipDrill)blocks[j];
-		Drills.Add(drill);
-		if (UseLCDDebug) { Debug("- Drill: " + drill.Name.ToString() + " found", true); }
-	}
-	
-	// populate downwards piston list
-	var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DownPistonGroupName; });
-	var blocks = group.Blocks;
-	for(var j=0; j < blocks.Count; j++)
-	{
-		var piston = (IMyPistonBase)blocks[j];
-		DownPistons.Add(piston);
-		if (UseLCDDebug) { Debug("- DPiston: " + piston.Name.ToString() + " found", true); }
-	}
-	
-	// populate sidewards piston list if used in this ADS
-	if (UseSidePistons)
-	{
-		var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == SidePistonGroupName; });
-		var blocks = group.Blocks;
-		for(var j=0; j < blocks.Count; j++)
-		{
-			var piston = (IMyPistonBase)blocks[j];
-			SidePistons.Add(piston);
-			if (UseLCDDebug) { Debug("- SPiston: " + piston.Name.ToString() + " found", true); }
-		}
-	}
-	
-	// find ADS_Rotor
-	IMyMotorStator ADS_Rotor = GridTerminalSystem.GetBlockWithName(RotorName) as IMyMotorStator;
-	if (UseLCDDebug) { Debug("- Rotor: " + ADS_Rotor.Name.ToString() + " found", true); }
-	
-	// find ADS_Timer
-	IMyTimerBlock ADS_Timer = GridTerminalSystem.GetBlockWithName(TimerName) as IMyTimerBlock;
-	if (UseLCDDebug) { Debug("- Timer: " + ADS_Timer.Name.ToString() + " found", true); }
-	
-	// find ADS_CPU
-	IMyProgrammableBlock ADS_CPU = GridTerminalSystem.GetBlockWithName(CPUName) as IMyProgrammableBlock;
-	if (UseLCDDebug) { Debug("- CPU: " + ADS_CPU.Name.ToString() + " found", true); }
-	
-	// find ADS_Storage if checking storage is on
-	if (CheckStorage)
-	{
-		IMyCargoContainer ADS_Storage = GridTerminalSystem.GetBlockWithName(StorageName) as IMyCargoContainer;
-		if (UseLCDDebug) { Debug("- Storage: " + ADS_Storage.Name.ToString() + " found", true); }
-	}
-	
-	// find ADS_Beacon if using beacon is on
-	if (UseBeacon)
-	{
-		IMyBeacon ADS_Beacon = GridTerminalSystem.GetBlockWithName(BeaconName) as IMyBeacon;
-		if (UseLCDDebug) { Debug("- Beacon: " + ADS_Beacon.Name.ToString() + " found", true); }
-	}
-	
-	// find ADS_Status if using Status LCD is on
-	if (UseLCDStatus)
-	{
-		IMyTextPanel ADS_Status = GridTerminalSystem.GetBlockWithName(LCDStatusName) as IMyTextPanel;
-		if (UseLCDDebug) { Debug("- StatusLCD: " + ADS_Status.Name.ToString() + " found", true); }
-	}
-	
-	// change program state to init
-	state = StateInit;
-	if (UseLCDDebug) { Debug("- ADS State switched to StateInit", true); }
+   // find ADS_Debug if using Debug LCD is on
+   if (UseLCDDebug)
+   {
+      IMyTextPanel ADS_Debug = GridTerminalSystem.GetBlockWithName(LCDDebugName) as IMyTextPanel;
+   }
+   if (UseLCDDebug) { Debug("State: start", false); }
+   if (UseLCDDebug) { Debug("- Debug screen found", true); }
+
+   // populate drills list
+   var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DrillGroupName; });
+   var blocks = group.Blocks;
+   for(var j=0; j < blocks.Count; j++)
+   {
+      var drill = (IMyShipDrill)blocks[j];
+      Drills.Add(drill);
+      if (UseLCDDebug) { Debug("- Drill: " + drill.Name.ToString() + " found", true); }
+   }
+
+   // populate downwards piston list
+   var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DownPistonGroupName; });
+   var blocks = group.Blocks;
+   for(var j=0; j < blocks.Count; j++)
+   {
+      var piston = (IMyPistonBase)blocks[j];
+      DownPistons.Add(piston);
+      if (UseLCDDebug) { Debug("- DPiston: " + piston.Name.ToString() + " found", true); }
+   }
+
+   // populate sidewards piston list if used in this ADS
+   if (UseSidePistons)
+   {
+      var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == SidePistonGroupName; });
+      var blocks = group.Blocks;
+      for(var j=0; j < blocks.Count; j++)
+      {
+         var piston = (IMyPistonBase)blocks[j];
+         SidePistons.Add(piston);
+         if (UseLCDDebug) { Debug("- SPiston: " + piston.Name.ToString() + " found", true); }
+      }
+   }
+
+   // find ADS_Rotor
+   IMyMotorStator ADS_Rotor = GridTerminalSystem.GetBlockWithName(RotorName) as IMyMotorStator;
+   if (UseLCDDebug) { Debug("- Rotor: " + ADS_Rotor.Name.ToString() + " found", true); }
+
+   // find ADS_Timer
+   IMyTimerBlock ADS_Timer = GridTerminalSystem.GetBlockWithName(TimerName) as IMyTimerBlock;
+   if (UseLCDDebug) { Debug("- Timer: " + ADS_Timer.Name.ToString() + " found", true); }
+
+   // find ADS_CPU
+   IMyProgrammableBlock ADS_CPU = GridTerminalSystem.GetBlockWithName(CPUName) as IMyProgrammableBlock;
+   if (UseLCDDebug) { Debug("- CPU: " + ADS_CPU.Name.ToString() + " found", true); }
+
+   // find ADS_Storage if checking storage is on
+   if (CheckStorage)
+   {
+      IMyCargoContainer ADS_Storage = GridTerminalSystem.GetBlockWithName(StorageName) as IMyCargoContainer;
+      if (UseLCDDebug) { Debug("- Storage: " + ADS_Storage.Name.ToString() + " found", true); }
+   }
+
+   // find ADS_Beacon if using beacon is on
+   if (UseBeacon)
+   {
+      IMyBeacon ADS_Beacon = GridTerminalSystem.GetBlockWithName(BeaconName) as IMyBeacon;
+      if (UseLCDDebug) { Debug("- Beacon: " + ADS_Beacon.Name.ToString() + " found", true); }
+   }
+
+   // find ADS_Status if using Status LCD is on
+   if (UseLCDStatus)
+   {
+      IMyTextPanel ADS_Status = GridTerminalSystem.GetBlockWithName(LCDStatusName) as IMyTextPanel;
+      if (UseLCDDebug) { Debug("- StatusLCD: " + ADS_Status.Name.ToString() + " found", true); }
+   }
+
+   // change program state to init
+   state = StateInit;
+   if (UseLCDDebug) { Debug("- ADS State switched to StateInit", true); }
+
 }
+
 
 void init()
 {
-	if (UseLCDDebug) { Debug("State: init", false); }
+   if (UseLCDDebug) { Debug("State: init", false); }
 
-	// init status LCD
-	if (UseLCDDebug) { Status("Initializing ADS system and components ...", false); }
+   // init status LCD
+   if (UseLCDDebug) { Status("Initializing ADS system and components ...", false); }
 
-	
+   // only change state to next state if init mode is finished
+   // all pistons pulled in, switched off, 0.1m velocity?
+   // rotor switched of, in 0 angle, rotor rpm ok?
 
-	// only change state to next state if init mode is finished
-	// all pistons pulled in, switched off, 0.1m velocity?
-	// rotor switched of, in 0 angle, rotor rpm ok?
-// TODO
-	if ()
-	{
-		state = StateMineRing;
-		if (UseLCDDebug) { Debug("- ADS State switched to StateMineRing", true); }
-	}
+   if ()
+   {
+      state = StateMineRing;
+      if (UseLCDDebug) { Debug("- ADS State switched to StateMineRing", true); }
+   }
 }
 
 
 void preparering()
 {
-	# TODO
+   // TODO
 }
 
 
 void minering()
 {
-	# TODO
+   // TODO
 }
 
 void preparedisk()
 {
-	# TODO
+   // TODO
 }
 
 
 void finished()
 {
-	# TODO
+   // TODO
 }
 
 
 void paused()
 {
-	# TODO
+   // TODO
 }
 
 
@@ -216,17 +218,17 @@ Helper Functions
 // calculate percent
 public double GetPercent(double current, double max) 
 { 
-	return (max > 0 ? (current / max) * 100 : 100); 
+   return (max > 0 ? (current / max) * 100 : 100); 
 }
 
 // print to debug LCD
 void Debug(string text, bool append) 
 { 
-  ADS_Status.WritePublicText(text + "\n" , append); 
+   ADS_Status.WritePublicText(text + "\n" , append); 
 } 
 
 // print to status LCD
 void Status(string text, bool append) 
 { 
-  ADS_Debug.WritePublicText(text + "\n" , append); 
+   ADS_Debug.WritePublicText(text + "\n" , append); 
 }
