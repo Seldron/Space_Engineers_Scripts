@@ -23,6 +23,10 @@ string LCDDebugName = "ADS_Debug";
 float DownwardIncrement = 0.5f; // downwards piston extend
 float SidewaysIncrement = 2.5f; // sideways pisten extend
 float RotorRPM = 0.5f; // Rotor rounds per minute
+float RotorLL = 0.0f; // Rotor lower limit default
+float RotorUL = 360.0f; // Rotor upper limit default
+float DownwardsResetSpeed = 1.0f; // downwards piston reset speed
+
 
 // program states
 int StateStart = 0;
@@ -169,6 +173,20 @@ void init()
    // init status LCD
    if (UseLCDDebug) { Status("Initializing ADS system and components ...", false); }
 
+   // TODO: move all pistons to angle: 0
+   // TODO: move rotor to angle: 0
+   // TODO: after movement we set up normal starting states below
+
+   // setup rotor to init state
+   ADS_Rotor.ApplyAction("OnOff_Off");
+   ADS_Rotor.SetValue<float>("LowerLimit", RotorLL);
+   ADS_Rotor.SetValue<float>("UpperLimit", RotorUL);
+   ADS_Rotor.SetValue("Velocity", RotorRPM);
+   
+   // setup all pistons to init state
+   
+   
+   
    // only change state to next state if init mode is finished
    // all pistons pulled in, switched off, 0.1m velocity?
    // rotor switched of, in 0 angle, rotor rpm ok?
@@ -214,6 +232,28 @@ void paused()
 Helper Functions
 ===================
 */
+
+// move pistons to 0 extension
+void ResetAllPistons()
+{
+   for (int i = 0; i < DownPistons.Count; i++)
+   {
+      // TODO! CURRENT
+      IMyPistonBase P = DownPistons[i];
+      P.SetValue("Velocity",-0.1f);
+      P.ApplyAction("OnOff_On");
+   }
+   if (UseSidePistons)
+   {
+      for (int i = 0; i < SidePistons.Count; i++)
+      {
+         // TODO! CURRENT
+         IMyPistonBase P = DownPistons[i];
+         P.SetValue("Velocity",-0.1f);
+         P.ApplyAction("OnOff_On");
+      }
+   }
+}
 
 // calculate percent
 public double GetPercent(double current, double max) 
