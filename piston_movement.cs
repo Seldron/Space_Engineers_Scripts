@@ -1,6 +1,6 @@
 /*
 ######################################################################################
-Space Engineers Piston Control Draft V2
+Space Engineers Piston Control
 Script can be used to control a piston by buttons or hotbar shortcuts.
 The script doesn't need a timer, since the button pressed will initiate the movement.
 It needs 2 arguments seperated by ,
@@ -45,7 +45,7 @@ public void Main(string argument)
    // - movement
    if (direction == "-")
    {
-      float target = P_Pos. - P_Extend;
+      float target = P_Pos - P_Extend;
       if (target < 0) { target = 0.0f; }
       Piston.SetValue<float>("UpperLimit", target);
       Piston.SetValue("Velocity",P_Velocity*-1);
