@@ -211,41 +211,81 @@ void init()
    }
 
    // setup rotor to init state
-   if (UseLCDStatus) { Status("- Moving rotor to init state", true); }
-   ADS_Rotor.ApplyAction("OnOff_Off");
+   if (UseLCDStatus) { Status("- Setting rotor to init state", true); }
+   if (UseLCDDebug) { Debug("Setting up rotor init state:", true); }
    ADS_Rotor.SetValue<float>("LowerLimit", RotorLL);
    ADS_Rotor.SetValue<float>("UpperLimit", RotorUL);
-   ADS_Rotor.SetValue("Velocity", RotorRPM);
-   if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
-   
+   int Rotor_Angle = Convert.ToInt32((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
+   if (Rotor_Angle >= RotorLL) and (Rotor_Angle <= (RotorLL + 3)))
+   {
+      ADS_Rotor.ApplyAction("OnOff_On");
+      ADS_Rotor.SetValue("Velocity", RotorResetSpeed);
+      if (UseLCDStatus) { Status("- Moving rotor to init state", true); }
+      if (UseLCDDebug) { Debug("- " + ADS_Rotor.Name.ToString() + " -> moving", true); }
+   } else
+   {
+      if (UseLCDDebug) { Debug("- " + ADS_Rotor.Name.ToString() + " -> done", true); }
+   }  
+
    // check if all blocks are in init state and prepare normal block settings
    if (UseLCDStatus) { Status("- veryfing init state positions", true); }
-   if (UseLCDDebug) { Debug("Checking if pistons and rotor reached init state:", true); }
+   var init_done = true;
+   
    // verify DownPiston positions
+   if (UseLCDDebug) { Debug("Checking if downwards pistons reached init state:", true); }
    for (int i = 0; i < DownPistons.Count; i++)
    {
       IMyPistonBase P = DownPistons[i];
-      // TODO: CURRENT check piston extension
-      
-      
-      P.SetValue("Velocity",DownPistonResetSpeed);
-      P.ApplyAction("OnOff_Off");
-      if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
-   }
-   if (UseSidePistons)
-   {
-      if (UseLCDStatus) { Status("- Moving sideways pistons to init state", true); }
-      if (UseLCDDebug) { Debug("Moving sideways pistons to init state:", true); }
-      for (int i = 0; i < SidePistons.Count; i++)
+      double P_Pos = Convert.ToDouble((P.DetailedInfo.Remove(0,28)).TrimEnd('m'));
+      if (P_Pos == 0.0f)
       {
-         IMyPistonBase P = SidePistons[i];
-         P.SetValue("Velocity",SidePistonResetSpeed);
-         P.ApplyAction("OnOff_On");
-         if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
+         if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> finished", true); }
+         P.SetValue("Velocity",0.0f);
+         P.ApplyAction("OnOff_Off");
+      } else
+      {
+         init_done = false;
+         if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> still moving", true); }
       }
    }
    
-   if ()
+   // verify SidePiston positions
+   if (UseLCDDebug) { Debug("Checking if sideways pistons reached init state:", true); }
+   if (UseSidePistons)
+   {
+      for (int i = 0; i < SidePistons.Count; i++)
+      {
+         IMyPistonBase P = SidePistons[i];
+         double P_Pos = Convert.ToDouble((P.DetailedInfo.Remove(0,28)).TrimEnd('m'));
+         if (P_Pos == 0.0f)
+         {
+            if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> finished", true); }
+            P.SetValue("Velocity",0.0f);
+            P.ApplyAction("OnOff_Off");
+         } else
+         {
+            init_done = false;
+            if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> still moving", true); }
+         }
+      }
+   }
+   
+   // verify rotor position
+   if (UseLCDDebug) { Debug("Checking if rotor reached init state:", true); }
+   int Rotor_Angle = Convert.ToInt32((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
+   if (Rotor_Angle >= RotorLL) and (Rotor_Angle <= (RotorLL + 3)))
+   {
+      if (UseLCDDebug) { Debug("- " + ADS_Rotor.Name.ToString() + " -> finished", true); }
+      ADS_Rotor.SetValue("Velocity",0.0f);
+      ADS_Rotor.ApplyAction("OnOff_Off");
+   } else
+   {
+      init_done = false;
+      if (UseLCDDebug) { Debug("- " + ADS_Rotor.Name.ToString() + " -> still moving", true); }
+   }
+
+   // change program state to StateMineRing
+   if (init_done)
    {
       state = StateMineRing;
       if (UseLCDDebug) { Debug("- ADS State switched to StateMineRing", true); }
