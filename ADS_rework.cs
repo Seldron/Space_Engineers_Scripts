@@ -25,8 +25,12 @@ float SidewaysIncrement = 2.5f; // sideways pisten extend
 float RotorRPM = 0.5f; // Rotor rounds per minute
 float RotorLL = 0.0f; // Rotor lower limit default
 float RotorUL = 360.0f; // Rotor upper limit default
-float DownwardsResetSpeed = 1.0f; // downwards piston reset speed
+float DownPistonResetSpeed = -1.0f; // downwards piston reset speed
+float SidePistonResetSpeed = -1.0f; // sideways piston reset speed
+float RotorResetSpeed = -1.5f; // rotor reset speed
 
+/* Don't change anything below these lines!
+*/
 
 // program states
 int StateStart = 0;
@@ -96,9 +100,9 @@ void start()
    // populate drills list
    var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DrillGroupName; });
    var blocks = group.Blocks;
-   for(var j=0; j < blocks.Count; j++)
+   for(var i=0; i < blocks.Count; i++)
    {
-      var drill = (IMyShipDrill)blocks[j];
+      var drill = (IMyShipDrill)blocks[i];
       Drills.Add(drill);
       if (UseLCDDebug) { Debug("- Drill: " + drill.Name.ToString() + " found", true); }
    }
@@ -106,9 +110,9 @@ void start()
    // populate downwards piston list
    var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == DownPistonGroupName; });
    var blocks = group.Blocks;
-   for(var j=0; j < blocks.Count; j++)
+   for(var i=0; i < blocks.Count; i++)
    {
-      var piston = (IMyPistonBase)blocks[j];
+      var piston = (IMyPistonBase)blocks[i];
       DownPistons.Add(piston);
       if (UseLCDDebug) { Debug("- DPiston: " + piston.Name.ToString() + " found", true); }
    }
@@ -118,9 +122,9 @@ void start()
    {
       var group = GridTerminalSystem.BlockGroups.Find(delegate(IMyBlockGroup blockGroup) { return blockGroup.Name == SidePistonGroupName; });
       var blocks = group.Blocks;
-      for(var j=0; j < blocks.Count; j++)
+      for(var i=0; i < blocks.Count; i++)
       {
-         var piston = (IMyPistonBase)blocks[j];
+         var piston = (IMyPistonBase)blocks[i];
          SidePistons.Add(piston);
          if (UseLCDDebug) { Debug("- SPiston: " + piston.Name.ToString() + " found", true); }
       }
@@ -171,26 +175,76 @@ void init()
    if (UseLCDDebug) { Debug("State: init", false); }
 
    // init status LCD
-   if (UseLCDDebug) { Status("Initializing ADS system and components ...", false); }
+   if (UseLCDStatus) { Status("Initializing ADS system and components ...", false); }
 
-   // TODO: move all pistons to angle: 0
-   // TODO: move rotor to angle: 0
-   // TODO: after movement we set up normal starting states below
+   // setup all drills to init state
+   if (UseLCDStatus) { Status("- changing drills to init state", true); }
+   if (UseLCDDebug) { Debug("Adjusting drills to init state:", true); }
+   for (int i = 0; i < DownPistons.Count; i++)
+   {
+      IMyShipDrill D = Drills[i];
+      D.ApplyAction("OnOff_Off");
+      if (UseLCDDebug) { Debug("- " + D.Name.ToString() + " -> offline", true); }
+   }
+
+   // setup all pistons to init state
+   if (UseLCDStatus) { Status("- Moving downwards pistons to init state", true); }
+   if (UseLCDDebug) { Debug("Moving downward pistons to init state:", true); }
+   for (int i = 0; i < DownPistons.Count; i++)
+   {
+      IMyPistonBase P = DownPistons[i];
+      P.SetValue("Velocity",DownPistonResetSpeed);
+      P.ApplyAction("OnOff_On");
+      if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
+   }
+   if (UseSidePistons)
+   {
+      if (UseLCDStatus) { Status("- Moving sideways pistons to init state", true); }
+      if (UseLCDDebug) { Debug("Moving sideways pistons to init state:", true); }
+      for (int i = 0; i < SidePistons.Count; i++)
+      {
+         IMyPistonBase P = SidePistons[i];
+         P.SetValue("Velocity",SidePistonResetSpeed);
+         P.ApplyAction("OnOff_On");
+         if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
+      }
+   }
 
    // setup rotor to init state
+   if (UseLCDStatus) { Status("- Moving rotor to init state", true); }
    ADS_Rotor.ApplyAction("OnOff_Off");
    ADS_Rotor.SetValue<float>("LowerLimit", RotorLL);
    ADS_Rotor.SetValue<float>("UpperLimit", RotorUL);
    ADS_Rotor.SetValue("Velocity", RotorRPM);
+   if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
    
-   // setup all pistons to init state
+   // check if all blocks are in init state and prepare normal block settings
+   if (UseLCDStatus) { Status("- veryfing init state positions", true); }
+   if (UseLCDDebug) { Debug("Checking if pistons and rotor reached init state:", true); }
+   // verify DownPiston positions
+   for (int i = 0; i < DownPistons.Count; i++)
+   {
+      IMyPistonBase P = DownPistons[i];
+      // TODO: CURRENT check piston extension
+      
+      
+      P.SetValue("Velocity",DownPistonResetSpeed);
+      P.ApplyAction("OnOff_Off");
+      if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
+   }
+   if (UseSidePistons)
+   {
+      if (UseLCDStatus) { Status("- Moving sideways pistons to init state", true); }
+      if (UseLCDDebug) { Debug("Moving sideways pistons to init state:", true); }
+      for (int i = 0; i < SidePistons.Count; i++)
+      {
+         IMyPistonBase P = SidePistons[i];
+         P.SetValue("Velocity",SidePistonResetSpeed);
+         P.ApplyAction("OnOff_On");
+         if (UseLCDDebug) { Debug("- " + P.Name.ToString() + " -> moving", true); }
+      }
+   }
    
-   
-   
-   // only change state to next state if init mode is finished
-   // all pistons pulled in, switched off, 0.1m velocity?
-   // rotor switched of, in 0 angle, rotor rpm ok?
-
    if ()
    {
       state = StateMineRing;
@@ -232,28 +286,6 @@ void paused()
 Helper Functions
 ===================
 */
-
-// move pistons to 0 extension
-void ResetAllPistons()
-{
-   for (int i = 0; i < DownPistons.Count; i++)
-   {
-      // TODO! CURRENT
-      IMyPistonBase P = DownPistons[i];
-      P.SetValue("Velocity",-0.1f);
-      P.ApplyAction("OnOff_On");
-   }
-   if (UseSidePistons)
-   {
-      for (int i = 0; i < SidePistons.Count; i++)
-      {
-         // TODO! CURRENT
-         IMyPistonBase P = DownPistons[i];
-         P.SetValue("Velocity",-0.1f);
-         P.ApplyAction("OnOff_On");
-      }
-   }
-}
 
 // calculate percent
 public double GetPercent(double current, double max) 
