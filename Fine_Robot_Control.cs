@@ -115,15 +115,13 @@ void Main(string argument)
       // move a rotor in + direction
       if (Action == "R+")
       {
-         
-         
+         MoveRotor(BlockName, "+", Extend, Velocity)
       }
       
       // move a rotor in - direction
       if (Action == "R-")
       {
-         
-         
+         MoveRotor(BlockName, "-", Extend, Velocity)
       }
       
       // move a piston in + direction
@@ -196,6 +194,7 @@ void MoveRotor(string RotorName, string Direction, float AngleExtend, float Velo
       float target = R_Angle + AngleExtend;
       Rotor.SetValue("UpperLimit", target);
       Rotor.SetValue("Velocity",Velocity);
+      Rotor.ApplyAction("OnOff_On");
    }
 
    // - movement
@@ -204,6 +203,7 @@ void MoveRotor(string RotorName, string Direction, float AngleExtend, float Velo
       float target = R_Angle - AngleExtend;
       Rotor.SetValue("LowerLimit", target);
       Rotor.SetValue("Velocity",Velocity*-1);
+      Rotor.ApplyAction("OnOff_On");
    }
 }
 
@@ -221,6 +221,7 @@ void MovePiston(string PistonName, string Direction, float Extend, float Velocit
       float target = P_Pos + Extend;
       Piston.SetValue("UpperLimit", target);
       Piston.SetValue("Velocity",P_Velocity);
+      Piston.ApplyAction("OnOff_On");
    }
 
    // - movement
@@ -230,5 +231,6 @@ void MovePiston(string PistonName, string Direction, float Extend, float Velocit
       if (target < 0) { target = 0.0f; }
       Piston.SetValue("UpperLimit", target);
       Piston.SetValue("Velocity",P_Velocity*-1);
+      Piston.ApplyAction("OnOff_On");
    }
 }
