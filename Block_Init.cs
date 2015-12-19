@@ -71,8 +71,8 @@ void InitRotor(string RotorName, float InitPos, float Velocity)
 {
    IMyMotorStator Rotor = GridTerminalSystem.GetBlockWithName(RotorName) as IMyMotorStator;
    float Angle = (float) Convert.ToDouble((Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
-   float UL = InitPos + 3;
-   float LL = InitPos -3;
+   float UL = InitPos + 3.0f;
+   float LL = InitPos -3.0f;
    float Velocity_Inverse = -1 * Velocity;
    if (Angle >= UL)
    {
@@ -92,8 +92,8 @@ void InitPiston(string PistonName, float InitPos, float Velocity)
 {
    IMyPistonBase Piston = GridTerminalSystem.GetBlockWithName(PistonName) as IMyPistonBase;
    float Pos = (float) Convert.ToDouble((Piston.DetailedInfo.Remove(0,28)).TrimEnd('m'));
-   float UL = InitPos + 0.2;
-   float LL = InitPos - 0.2;
+   float UL = InitPos + 0.2f;
+   float LL = InitPos - 0.2f;
    float Velocity_Inverse = -1 * Velocity;
    if (Pos >= UL)
    {
