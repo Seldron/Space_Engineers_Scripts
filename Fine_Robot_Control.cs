@@ -119,25 +119,25 @@ void Main(string argument)
       // move a rotor in + direction
       if (Action == "R+")
       {
-         MoveRotor(BlockName, "+", Extend, Velocity)
+         MoveRotor(BlockName, "+", Extend, Velocity);
       }
       
       // move a rotor in - direction
       if (Action == "R-")
       {
-         MoveRotor(BlockName, "-", Extend, Velocity)
+         MoveRotor(BlockName, "-", Extend, Velocity);
       }
       
       // move a piston in + direction
       if (Action == "P+")
       {
-         MovePiston(BlockName, "+", Extend, Velocity)
+         MovePiston(BlockName, "+", Extend, Velocity);
       }
       
       // move a piston in - direction
       if (Action == "P-")
       {
-         MovePiston(BlockName, "-", Extend, Velocity)
+         MovePiston(BlockName, "-", Extend, Velocity);
       }
    }
 }
@@ -224,7 +224,7 @@ void MovePiston(string PistonName, string Direction, float Extend, float Velocit
    {
       float target = P_Pos + Extend;
       Piston.SetValue("UpperLimit", target);
-      Piston.SetValue("Velocity",P_Velocity);
+      Piston.SetValue("Velocity",Velocity);
       Piston.ApplyAction("OnOff_On");
    }
 
@@ -234,7 +234,7 @@ void MovePiston(string PistonName, string Direction, float Extend, float Velocit
       float target = P_Pos - Extend;
       if (target < 0) { target = 0.0f; }
       Piston.SetValue("UpperLimit", target);
-      Piston.SetValue("Velocity",P_Velocity*-1);
+      Piston.SetValue("Velocity",Velocity*-1);
       Piston.ApplyAction("OnOff_On");
    }
 }
