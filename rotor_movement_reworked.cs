@@ -38,15 +38,15 @@ public void Main(string argument)
    if (direction == "+")
    {
       float target = R_Angle + R_Angle_Extend;
-      Piston.SetValue("UpperLimit", target);
-      Piston.SetValue("Velocity",R_Velocity);
+      Rotor.SetValue("UpperLimit", target);
+      Rotor.SetValue("Velocity",R_Velocity);
    }
 
    // - movement
    if (direction == "-")
    {
       float target = R_Angle - R_Angle_Extend;
-      Piston.SetValue("LowerLimit", target);
-      Piston.SetValue("Velocity",R_Velocity*-1);
+      Rotor.SetValue("LowerLimit", target);
+      Rotor.SetValue("Velocity",R_Velocity*-1);
    }
 }
