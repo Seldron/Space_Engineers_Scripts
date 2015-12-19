@@ -19,7 +19,7 @@ string CPUName = "ADS_CPU";
 string LCDStatusName = "ADS_Status";
 string LCDDebugName = "ADS_Debug";
 
-//calculation vars
+// option vars
 float DownwardIncrement = 0.5f; // downwards piston extend
 float SidewaysIncrement = 2.5f; // sideways pisten extend
 float RotorRPM = 0.5f; // Rotor rounds per minute
@@ -165,6 +165,7 @@ void start()
 
    // change program state to init
    state = StateInit;
+   last_state = StateStart;
    if (UseLCDDebug) { Debug("- ADS State switched to StateInit", true); }
 
 }
@@ -180,7 +181,7 @@ void init()
    // setup all drills to init state
    if (UseLCDStatus) { Status("- changing drills to init state", true); }
    if (UseLCDDebug) { Debug("Adjusting drills to init state:", true); }
-   for (int i = 0; i < DownPistons.Count; i++)
+   for (int i = 0; i < Drills.Count; i++)
    {
       IMyShipDrill D = Drills[i];
       D.ApplyAction("OnOff_Off");
@@ -213,10 +214,10 @@ void init()
    // setup rotor to init state
    if (UseLCDStatus) { Status("- Setting rotor to init state", true); }
    if (UseLCDDebug) { Debug("Setting up rotor init state:", true); }
-   ADS_Rotor.SetValue<float>("LowerLimit", RotorLL);
-   ADS_Rotor.SetValue<float>("UpperLimit", RotorUL);
-   int Rotor_Angle = Convert.ToInt32((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
-   if (Rotor_Angle >= RotorLL) and (Rotor_Angle <= (RotorLL + 3)))
+   ADS_Rotor.SetValue("LowerLimit", RotorLL);
+   ADS_Rotor.SetValue("UpperLimit", RotorUL);
+   float Rotor_Angle = (float) Convert.ToDouble((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
+   if (Rotor_Angle >= RotorLL) and (Rotor_Angle <= (RotorLL + 3.0f)))
    {
       ADS_Rotor.ApplyAction("OnOff_On");
       ADS_Rotor.SetValue("Velocity", RotorResetSpeed);
@@ -288,6 +289,7 @@ void init()
    if (init_done)
    {
       state = StateMineRing;
+      last_state = StateInit;
       if (UseLCDDebug) { Debug("- ADS State switched to StateMineRing", true); }
    }
 }
@@ -296,12 +298,114 @@ void init()
 void preparering()
 {
    // TODO
+   // start drills
+   // if sidepistons not fully extended set new target extension
+   // if sidepistons fully extended set target for all sidepistons to 0 
+   // when target extend reached to go prepare disk
 }
 
 
 void minering()
 {
-   // TODO
+   if (UseLCDDebug) { Debug("State: MineRing", false); }
+   if (UseLCDStatus) { Status("Starting to mine current ring ...", false); }
+
+   // activate drills
+   if (UseLCDDebug) { Debug("Activating drills:", true); }
+   for (int i = 0; i < Drills.Count; i++)
+   {
+      IMyShipDrill D = Drills[i];
+      D.ApplyAction("OnOff_On");
+      if (UseLCDDebug) { Debug("- " + D.Name.ToString() + " -> online", true); }
+   }
+   
+   // we just got into this state, prepare targets
+   if (last_state != StateMineRing)
+   {
+      if (UseLCDDebug) { Debug("Just started mining, preparing targets...", true); }
+      // setup rotor speed
+      ADS_Rotor.SetValue("Velocity", RotorRPM);
+      if ((RotorUL != 360.0f) or (RotorLL != 0.0f))
+      {
+         if (UseLCDDebug) { Debug("Not in full circle mode:", true); }
+         // if we are not in full circle mode we need to find out if we need to mine forward or backwards
+         // find current RotorPosition
+         float Rotor_Angle = (float) Convert.ToDouble((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
+         if ((Rotor_Angle <= RotorUL) and (Rotor_Angle >= (RotorUL - 3.0f)))
+         {
+            // if we are on the upper end of the rotor limits we have to change direction
+            ADS_Rotor.SetValue("Velocity", RotorRPM*-1);
+            // set target_angle to lower limit if we are in reverse mode
+            target_angle = RotorLL;
+            if (UseLCDDebug) { Debug(" - Mining backwards ...", true); }
+         } else
+         {
+            if (UseLCDDebug) { Debug(" - Mining forwards ...", true); }
+            // set target_angle
+            target_angle = RotorUL;
+         }
+      }
+      
+      // setup rotor limits
+      ADS_Rotor.SetValue("UpperLimit", RotorUL);
+      ADS_Rotor.SetValue("LowerLimit", RotorLL);
+      
+      // switch rotor on
+      ADS_Rotor.ApplyAction("OnOff_On");
+      
+      // set last state to MineRing
+      last_state = StateMineRing;
+   } else
+   {
+      if (UseLCDDebug) { Debug("Verifying if MineRing is finished:", true); }
+      
+      // check rotor angle to figure out when ADS has finished this state
+      float Rotor_Angle = (float) Convert.ToDouble((ADS_Rotor.DetailedInfo.Remove(0,25)).TrimEnd('°'));
+      
+      // if we are not in full circle mode we have to check if we are in reverse mode
+      // in reverse mode we have to check lower limit reached instead of upper limit reached
+      if ((RotorUL != 360.0f) or (RotorLL != 0.0f))
+      {
+         if (target_angle == RotorLL)
+         {
+            // we are in reverse mode and have to check LL reached instead of UL reached
+            if ((Rotor_Angle >= RotorLL) and (Rotor_Angle <= (RotorLL + 3.0f)))
+            {
+               // FINISHED MINING "RING"
+               if (UseLCDStatus) { Status("Finished mining current ring ...", false); }
+               if (UseLCDDebug) { Debug(" - Finshed!", true); }
+               // TODO: Define Actions
+               
+               
+               
+            } else { if (UseLCDDebug) { Debug(" - Still mining!", true); } }
+         } else
+         {
+            if ((Rotor_Angle <= RotorUL) and (Rotor_Angle >= (RotorUL - 3.0f)))
+            {
+               // FINISHED MINING "RING"
+               if (UseLCDStatus) { Status("Finished mining current ring ...", false); }
+               if (UseLCDDebug) { Debug(" - Finished!", true); }
+               // TODO: Define Actions
+               
+               
+               
+            } else { if (UseLCDDebug) { Debug(" - Still mining!", true); } }
+         }
+      } else
+      {
+         if ((Rotor_Angle <= RotorUL) and (Rotor_Angle >= (RotorUL - 3.0f)))
+         {
+            // FINISHED MINING RING
+            if (UseLCDStatus) { Status("Finished mining current ring ...", false); }
+            if (UseLCDDebug) { Debug(" - Finished!", true); }
+            // TODO: Define Actions
+            
+            
+            
+         } else { if (UseLCDDebug) { Debug(" - Still mining!", true); } }
+      }
+   }
 }
 
 void preparedisk()
