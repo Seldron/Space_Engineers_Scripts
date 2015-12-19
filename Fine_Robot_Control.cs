@@ -91,19 +91,19 @@ void Main(string argument)
       Piston_Name = "your pistons name";
       Piston_InitPos = 0.0f; // init position (m) as a floating point variable
       Piston_InitVelocity = 0.25f; // speed in meter per second as a floating point variable
-      InitRotor(Piston_Name,Piston_InitPos,Piston_InitVelocity); // this function sets your wanted values
+      InitPiston(Piston_Name,Piston_InitPos,Piston_InitVelocity); // this function sets your wanted values
       ################# PISTON TEMPLATE START ########################################
       */
       
       Piston_Name = "Piston 1";
       Piston_InitPos = 0.0f;
       Piston_InitVelocity = 0.25f;
-      InitRotor(Piston_Name,Piston_InitPos,Piston_InitVelocity);
+      InitPiston(Piston_Name,Piston_InitPos,Piston_InitVelocity);
       
       Piston_Name = "Piston 2";
       Piston_InitPos = 0.0f;
       Piston_InitVelocity = 0.25f;
-      InitRotor(Piston_Name,Piston_InitPos,Piston_InitVelocity);
+      InitPiston(Piston_Name,Piston_InitPos,Piston_InitVelocity);
       
 // ################# INIT SECTION END ##############################################
 
