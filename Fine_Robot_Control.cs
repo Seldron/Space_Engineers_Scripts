@@ -32,7 +32,7 @@ P-,Piston1,0.25,0.25
 -> will pull in Piston1 by 0.25 m with a speed of 0.25 meters per second
 
 Init
--> will move every block defined in the Init section of this Main script
+-> will move every block defined in the INIT SECTION in the main function of this script
    into its specified "Home" positions
 
 ######################################################################################
@@ -52,6 +52,8 @@ void Main(string argument)
    Init Functions, Adjust the following Block to your Initial State Needs.
    Delete Example Sections if you don't need them.'
    */
+// ################# INIT SECTION START ##############################################
+// ################# SETUP YOUR HOME POSITIONS HERE ##################################
    if (argument == "Init")
    {
       // move rotors to their init state
@@ -102,6 +104,8 @@ void Main(string argument)
       Piston_InitPos = 0.0f;
       Piston_InitVelocity = 0.25f;
       InitRotor(Piston_Name,Piston_InitPos,Piston_InitVelocity);
+      
+// ################# INIT SECTION END ##############################################
 
    } else
    {
