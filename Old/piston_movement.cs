@@ -47,7 +47,7 @@ public void Main(string argument)
    {
       float target = P_Pos - P_Extend;
       if (target < 0) { target = 0.0f; }
-      Piston.SetValue<float>("UpperLimit", target);
+      Piston.SetValue<float>("LowerLimit", target);
       Piston.SetValue("Velocity",P_Velocity*-1);
    }
 }

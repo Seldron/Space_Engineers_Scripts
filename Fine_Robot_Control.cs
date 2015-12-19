@@ -56,13 +56,13 @@ void Main(string argument)
 // ################# SETUP YOUR HOME POSITIONS HERE ##################################
    if (argument == "Init")
    {
-      // move rotors to their init state
-      /* TEMPLATE */
-      /*
+      /* move rotors to their init state
+      ################# ROTOR TEMPLATE START #########################################
       Rotor_Name = "your rotors name";
       Rotor_InitPos = 0.0f; // init angle as a floating point variable
       Rotor_InitVelocity = 0.5f; // speed in RPM as a floating point variable
-      InitRotor(Rotor_Name,Rotor_InitPos,Rotor_Velocity); // this function sets your wanted values
+      InitRotor(Rotor_Name,Rotor_InitPos,Rotor_InitVelocity); // this function sets your wanted values
+      ################# ROTOR TEMPLATE START #########################################
       */
       
       Rotor_Name = "Rotor1Name";
@@ -86,13 +86,13 @@ void Main(string argument)
       InitRotor(Rotor_Name,Rotor_InitPos,Rotor_InitVelocity);
 
 
-      // move pistons to their init state
-      /* TEMPLATE */
-      /*
+      /* move pistons to their init state
+      ################# PISTON TEMPLATE START ########################################
       Piston_Name = "your pistons name";
       Piston_InitPos = 0.0f; // init position (m) as a floating point variable
       Piston_InitVelocity = 0.25f; // speed in meter per second as a floating point variable
-      InitRotor(Piston_Name,Piston_InitPos,Piston_Velocity); // this function sets your wanted values
+      InitRotor(Piston_Name,Piston_InitPos,Piston_InitVelocity); // this function sets your wanted values
+      ################# PISTON TEMPLATE START ########################################
       */
       
       Piston_Name = "Piston 1";
@@ -233,7 +233,7 @@ void MovePiston(string PistonName, string Direction, float Extend, float Velocit
    {
       float target = P_Pos - Extend;
       if (target < 0) { target = 0.0f; }
-      Piston.SetValue("UpperLimit", target);
+      Piston.SetValue("LowerLimit", target);
       Piston.SetValue("Velocity",Velocity*-1);
       Piston.ApplyAction("OnOff_On");
    }
