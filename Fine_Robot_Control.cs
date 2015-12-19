@@ -28,8 +28,8 @@ Example Arguments:
 R+,Rotor1,5,0.5
 -> will move Rotor1 by 5 degrees in + direction with a speed of 0.5 rpm
 
-P-,Piston1,0.25,0.25
--> will pull in Piston1 by 0.25 m with a speed of 0.25 meters per second
+P-,Piston1,0.3,0.3
+-> will pull in Piston1 by 0.3 m with a speed of 0.3 meters per second
 
 Init
 -> will move every block defined in the INIT SECTION in the main function of this script
